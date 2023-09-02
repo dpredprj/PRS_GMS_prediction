@@ -1,8 +1,6 @@
 
 
 
-
-
 #########################################################################
 # 
 # PRS association
@@ -20,8 +18,6 @@ fac <-  c('MEN','CURR_SMOKE','exercise','PREVAL_DIAB_GDM','MI_FAMILYHIST')
 covariates <- setdiff(riskf, c('MEN'))
 covariates
 strat_sex <- 'strata(MEN)'
-additional_var <- c('BATCH','LIPID_TREAT','BP_TREAT')
-factorcol <-  c('MI_FAMILYHIST','BATCH','LIPID_TREAT','BP_TREAT')
 
 
 
@@ -34,8 +30,6 @@ fac <-  c('MEN','CURR_SMOKE','exercise','DIAB_FAMILYHIST')
 covariates <- setdiff(riskf, c('MEN'))
 covariates
 strat_sex <- 'strata(MEN)'
-# additional_var <- c('BATCH','Glc')
-# factorcol <- c('DIAB_FAMILYHIST','BATCH')
 
 
 
@@ -48,8 +42,6 @@ fac <-  c('MEN','CURR_SMOKE','exercise','DIAB_FAMILYHIST')
 covariates <- setdiff(riskf, c('MEN'))
 covariates
 strat_sex <- 'strata(MEN)'
-# additional_var <- c('BATCH','Glc')
-# factorcol <- c('DIAB_FAMILYHIST','BATCH')
 
 
 
@@ -64,9 +56,6 @@ fac <-  c('MEN','CURR_SMOKE','exercise','PREVAL_DIAB_T2','PREVAL_STR_SAH_TIA','P
 covariates <- setdiff(riskf, c('MEN'))
 covariates
 strat_sex <- 'strata(MEN)'
-# additional_var <- c('BATCH')
-# factorcol <- c('BATCH')
-
 
 
 
@@ -80,8 +69,6 @@ covariates <- setdiff(riskf, c('MEN'))
 covariates
 strat_sex <- NULL
 adjust_sex <- NULL
-# additional_var <- c('CANC_FAMILYHIST','BATCH')
-# factorcol <- c('CANC_FAMILYHIST','BATCH')
 
 
 
@@ -97,7 +84,7 @@ sapply(pcks, packageVersion)
 
 
 dim(pheno <- readRDS(get(paste0('fn.phenodata_', ds)))) 
-pheno[,(factorcol):=lapply(.SD, as.factor), .SDcols=factorcol]
+# pheno[,(fac):=lapply(.SD, as.factor), .SDcols=fac]
 
 
 lapply(pheno[,..riskf],summary)
@@ -105,7 +92,7 @@ summary(pheno[,c(ds.incident,ds.agediff),with=F])
 covariates
 
 
-dim(dt <- Reduce(function(x,y) merge(x = x, y = y, by = "FID", sort=F), 
+dim(dt <- Reduce(function(x,y) merge(x = x, y = y, by = "ID_variable", sort=F), 
                  list(pheno, dt.pcs, dt.prs)))
 dt[,(ds.incident):=lapply(.SD, as.numeric), .SDcol=ds.incident]
 
@@ -184,15 +171,13 @@ invisible(lapply(res.prs, function(x){
 
 # --------------------------------------------------------
 
-dt.newvarnm <- data.table(varname = c("BL_AGE","BMI","SYSTM","DIASM","KOL","HDL","TRIG","ALKI2_FR02",
+dt.newvarnm <- data.table(varname = c("BL_AGE","BMI","SYSTM","DIASM","KOL","HDL","TRIG","ALKI2_FR02","Glc",
                                       "fit_preval","CAD_PGS000018","T2D_PGS000036","AD_PGS000334","prostate_PGS000662",
-                                      "FR02_GLUK_120","FR02_GLUK_NOLLA","FR02_INS_0H","Glc",
                                       "CURR_SMOKE","exercise","PREVAL_DIAB_GDM","PREVAL_DIAB_T2","PREVAL_MENTAL","PREVAL_STR_SAH_TIA","HOMAIR_fac","HOMAIR_fac",
                                       "MI_FAMILYHIST","DIAB_FAMILYHIST","CANC_FAMILYHIST",
                                       "all_crf","PRS_and_all_crf","PRS_and_all_crf_and_10pc"),
-                          labelname = c("Baseline age", "BMI", "Systolic BP", "Diastolic BP","Total cholesterol","HDL","Triglyceride","Alcohol consumption", 
+                          labelname = c("Baseline age", "BMI", "Systolic BP", "Diastolic BP","Total cholesterol","HDL","Triglyceride","Alcohol consumption", "Glucose",
                                         "Gut microbiome score","PRS","PRS","PRS","PRS",
-                                        "Glucose Tolerance 2hrs","Fasting glucose","Fasting insulin","Glucose",
                                         "Smoking","Exercise","Prevalent diabetes", "Prevalent T2D","Prevalent psychiatric disorders","Prevalent stroke","HOMA-IR (1.9,2.9]","HOMA-IR > 2.9",
                                         "Family history","Family history","Family history",
                                         "Conventional risk factors","PRS + Conventional risk factors","PRS + Conventional risk factors + 10PCs"))
@@ -393,21 +378,16 @@ p <- plot_grid(cad.p,
 
 # plot HR
 
-dt.newvarnm <- data.table(var = c(paste0(paste0('scale(',
-                                                c("BL_AGE","BMI","SYSTM","DIASM","KOL","HDL","TRIG","ALKI2_FR02",
-                                                  "fit_preval","CAD_PGS000018","T2D_PGS000036","AD_PGS000334","prostate_PGS000662",
-                                                  "FR02_GLUK_120","FR02_GLUK_NOLLA","FR02_INS_0H","Glc")),
-                                         ')'),
-                                  paste0(c("CURR_SMOKE","exercise","PREVAL_DIAB_GDM","PREVAL_DIAB_T2","PREVAL_MENTAL","PREVAL_STR_SAH_TIA"),1),
-                                  "HOMAIR_fac1","HOMAIR_fac2",
-                                  "MI_FAMILYHIST1","DIAB_FAMILYHIST1","CANC_FAMILYHIST1"), 
-                          
+
+dt.newvarnm <- data.table(var = c(paste0(paste0('scale(',c("BL_AGE","BMI","SYSTM","DIASM","KOL","HDL","TRIG","ALKI2_FR02",
+                                                           "fit_preval","CAD_PGS000018","T2D_PGS000036","AD_PGS000334","prostate_PGS000662","Glc")),')'),
+                                  paste0(c("CURR_SMOKE","exercise","PREVAL_DIAB_GDM","PREVAL_DIAB_T2","PREVAL_MENTAL","PREVAL_STR_SAH_TIA",
+                                           "MI_FAMILYHIST","DIAB_FAMILYHIST","CANC_FAMILYHIST"),1)), 
                           labelname = c(paste0(c("Baseline age", "BMI", "Systolic BP", "Diastolic BP","Total cholesterol","HDL","Triglyceride","Alcohol consumption",
-                                                 "Gut microbiome score", "PRS","PRS","PRS","PRS",
-                                                 "Glucose Tolerance 2hrs","Fasting glucose","Fasting insulin","Glucose"),' per s.d.'),
+                                                 "Gut microbiome score", "PRS","PRS","PRS","PRS","Glucose"),' per s.d.'),
                                         paste0(c("Smoking","Exercise","Prevalent diabetes", "Prevalent T2D","Prevalent psychiatric disorders","Prevalent stroke",
-                                                 "HOMA-IR (1.9,2.9]","HOMA-IR > 2.9",
                                                  "Family history","Family history","Family history"), " (yes/no)")))
+
 
 
 # dt.cad <- readRDS('')
@@ -518,4 +498,291 @@ pc.p <-
         axis.title.x = element_blank(), 
         axis.text.y = element_text(size = 14),
         axis.title.y = element_text(size = 16)) 
+
+
+
+
+
+
+#########################################################################
+# 
+# PRS and gut microbiome score association
+# 
+#########################################################################
+
+
+# CHD
+ds <- 'CHD'
+ds.incident <- paste0('INCIDENT_',ds)
+ds.agediff <- paste0(ds, '_AGEDIFF')
+ds;ds.incident;ds.agediff
+prs <- 'CAD_PGS000018'
+riskf <- c('MEN','BL_AGE','BMI', 'SYSTM','KOL','HDL','CURR_SMOKE', 'exercise','PREVAL_DIAB_GDM','MI_FAMILYHIST')
+num <-  c('BL_AGE','BMI','SYSTM', 'KOL', 'HDL')
+fac <-  c('MEN','CURR_SMOKE','exercise','PREVAL_DIAB_GDM','MI_FAMILYHIST')
+covariates <- setdiff(riskf, c('MEN'))
+covariates
+strat_sex <- 'strata(MEN)'
+
+
+
+
+# T2D
+prs <- 'T2D_PGS000036'
+ds <- 'DIAB_T2'
+ds.incident <- paste0('INCIDENT_',ds)
+ds.agediff <- paste0(ds, '_AGEDIFF')
+riskf <- c('MEN','BL_AGE','BMI','SYSTM','KOL','HDL','TRIG','CURR_SMOKE','exercise', 'DIAB_FAMILYHIST')
+num <-  c('BL_AGE','BMI','SYSTM','KOL','HDL','TRIG')
+fac <-  c('MEN','CURR_SMOKE','exercise','DIAB_FAMILYHIST')
+covariates <- setdiff(riskf, c('MEN'))
+covariates
+strat_sex <- 'strata(MEN)'
+
+
+
+
+# AD
+prs <- 'AD_PGS000334'
+ds <- 'AD'; ds.incident <- paste0('INCIDENT_',ds); ds.agediff <- paste0(ds, '_AGEDIFF')
+riskf <- c('MEN','BL_AGE','BMI','SYSTM','DIASM','KOL','HDL','ALKI2_FR02','CURR_SMOKE','exercise',
+           'PREVAL_DIAB_T2','PREVAL_STR_SAH_TIA','PREVAL_MENTAL')
+num <-  c('BL_AGE','BMI','SYSTM','DIASM','KOL','HDL','ALKI2_FR02')
+fac <-  c('MEN','CURR_SMOKE','exercise','PREVAL_DIAB_T2','PREVAL_STR_SAH_TIA','PREVAL_MENTAL')
+covariates <- setdiff(riskf, c('MEN'))
+covariates
+strat_sex <- 'strata(MEN)'
+
+
+
+# PC
+prs <- 'prostate_PGS000662'
+ds <- 'CR_PROSTCANC'; ds.incident <- paste0('INCIDENT_',ds); ds.agediff <- paste0(ds, '_AGEDIFF')
+riskf <- c('BL_AGE','BMI','ALKI2_FR02','CURR_SMOKE','exercise','CANC_FAMILYHIST')
+num <-  c('BL_AGE','BMI','ALKI2_FR02')
+fac <-  c('CURR_SMOKE','exercise','CANC_FAMILYHIST')
+covariates <- setdiff(riskf, c('MEN'))
+covariates
+strat_sex <- NULL
+adjust_sex <- NULL
+
+
+
+unlink('.RData')
+rm(list = ls())
+pcks <- c('data.table','survival','caret','glmnet','ggplot2','gridExtra','grid','cowplot')
+sapply(pcks, require, character.only = TRUE)
+sapply(pcks, packageVersion)
+
+
+
+
+get_multivar_cox_stats <- function(cmd){
+  
+  x <- summary(cmd)
+  
+  res <- data.table(x$coef, keep.rownames = 'var')
+  res[,pval:=formatC(`Pr(>|z|)`, digits=2, format = "e")]
+  setnames(res, old = c('coef','exp(coef)'), new = c('beta','HR'))
+  conf.int <- data.table(x$conf.int, keep.rownames = 'var')
+  res <- merge(res, conf.int, sort=F)
+  setnames(res, old = c('lower .95' , 'upper .95'), new = c('HR.confint.lower.95' , 'HR.confint.upper.95'))
+  res[,`HR (95% CI)`:=paste0(round(HR, digits=2), " (", round(HR.confint.lower.95, digits=2), "-", round(HR.confint.upper.95, digits=2), ")")]
+  rmcol <- c('se(coef)','Pr(>|z|)','z','exp(coef)','exp(-coef)')
+  res[,(rmcol):=NULL]
+  
+  
+  p.wald <- formatC(x$wald["pvalue"], digits=2, format = "e") 
+  p.likelihood <- formatC(x$logtest["pvalue"], digits=2, format = "e")  
+  concordance <- x$concordance[1]
+  concordance.se <- x$concordance[2]
+  res[,p.waldTest:=p.wald]
+  res[,p.likelihoodTest:=p.likelihood]
+  res[,concordance:=concordance]
+  res[,concordance.se:=concordance.se]
+  
+  return(res)
+}
+
+
+dt.prs <- fread(fn.PRSice_all_score)
+dim(clrdata <- fread('...')) 
+dim(pheno <- readRDS('...')) 
+pheno[,(fac):=lapply(.SD, as.factor), .SDcols=fac]
+length(foldids <- readRDS('...'))  
+
+
+
+dim(ds.data <- merge(pheno[,c('Barcode', ds.incident),with=F], 
+                     clrdata, 
+                     by='Barcode',
+                     sort=F)) 
+system.time(
+  ridge_cvmod <- 
+    lapply( names(foldids) , function(i){
+      ridge_mod = cv.glmnet(x = data.matrix(ds.data[,!c('Barcode',ds.incident), with=F]), 
+                            y = ds.data[,get(ds.incident)], 
+                            alpha = 0,        
+                            lambda = 10^seq(-4, 2, length = 200), 
+                            family = "binomial", 
+                            type.measure = "auc", 
+                            intercept = T, 
+                            foldid = foldids[[i]],
+                            keep=TRUE, 
+                            # parallel = T, 
+                            standardize = FALSE) 
+      return(ridge_mod)
+    })
+)
+names(ridge_cvmod) <- names(foldids); names(ridge_cvmod)
+
+
+# ridge_cvm_lambda_min <-
+#   sapply(names(ridge_cvmod), USE.NAMES = TRUE, function(x){
+# 
+#     ridge_mod <- ridge_cvmod[[x]]
+#     cvm.res <- data.table(cvm = ridge_mod$cvm,
+#                           lambda = ridge_mod$lambda)
+#     n.min <- which(ridge_mod$lambda==ridge_mod$lambda.min)
+# 
+#     return(data.table(cvm.res[n.min], n.min=n.min))
+#   })
+# names(which.max(ridge_cvm_lambda_min['cvm',]))
+
+
+
+ridge_cvmod_best <- ridge_cvmod[[optimal_run]]   
+ridge_cvmod_best_pred <- data.table(ds.data[,c('Barcode',ds.incident),with=F], 
+                                    fit_preval = ridge_cvmod_best$fit.preval[,n.min], 
+                                    foldid = ridge_cvmod_best$foldid)
+
+
+dim(dt <- merge(ridge_cvmod_best_pred, pheno[,-ds.incident,with=F], by='Barcode', sort=F))
+dt[,(ds.incident):=lapply(.SD, as.numeric), .SDcol=ds.incident]
+
+
+fml.microbiome <- list(
+  
+  as.formula(paste0('Surv(', ds.agediff,',',ds.incident,')~ scale(fit_preval)')) ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c( 'scale(fit_preval)',strat_sex), collapse = "+")  ))   ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c( 'scale(fit_preval)','scale(BL_AGE)',strat_sex), collapse = "+")  ))  ,
+  
+  as.formula(paste0('Surv(', ds.agediff,',',ds.incident,')~', 
+                    paste0(c( paste0('scale(',num,')', collapse = ' + '), 
+                              paste0(setdiff(fac, 'MEN'), collapse = ' + '),
+                              strat_sex), collapse = "+")  )), 
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'), 
+                    paste0(c( 'scale(fit_preval)',
+                              paste0('scale(',num,')', collapse = ' + '), 
+                              paste0(setdiff(fac, 'MEN'), collapse = ' + '),
+                              strat_sex), collapse = "+")  ))
+)
+
+names(fml.microbiome) <- c('GMscore', 
+                           'GMscore_strat_sex', 
+                           'GMscore_strat_sex_adjust_age', 
+                           'crf_strat_sex', 
+                           'GMscore_crf_strat_sex')
+
+md.microbiome <- lapply(fml.microbiome, function(this.fml){
+  output.fit <- coxph(this.fml, data = dt)
+  output.fit$call$formula <- this.fml
+  return(output.fit)
+})
+res.microbiome <- lapply(md.microbiome, get_multivar_cox_stats)
+
+
+
+
+
+dim(dt <- merge(ridge_cvmod_best_pred, pheno[,-ds.incident,with=F], by='Barcode', sort=F))
+dim(dt <- merge(dt, dt.prs, by='FID', sort=F))
+dt[,(ds.incident):=lapply(.SD, as.numeric), .SDcol=ds.incident]
+
+
+
+fml.integrative <- list(
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c( 'scale(BL_AGE)',strat_sex), collapse = "+")  ) )   ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c(paste0('scale(',prs,')'), strat_sex), collapse = "+")  ))   ,
+  
+  # 3.	cox(ds, time on study) ~ scale(microbiome score) + strat(sex)
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c( 'scale(fit_preval)',strat_sex), collapse = "+")  ))   ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c(paste0('scale(',prs,')'), 'scale(BL_AGE)', strat_sex), collapse = "+")  ))   ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c( 'scale(fit_preval)','scale(BL_AGE)', strat_sex), collapse = "+")  ))   ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'),
+                    paste0(c(paste0('scale(',prs,')'), 'scale(fit_preval)','scale(BL_AGE)', strat_sex), collapse = "+")  ))   ,
+  
+  as.formula(paste0('Surv(', ds.agediff,',',ds.incident,')~', 
+                    paste0(c( paste0('scale(',num,')', collapse = ' + '), 
+                              paste0(setdiff(fac, 'MEN'), collapse = ' + '),
+                              strat_sex), collapse = "+")  )) ,
+  
+  as.formula(paste0(paste0('Surv(', ds.agediff,',',ds.incident,')~'), 
+                    paste0(c( paste0('scale(',prs,')'), 'scale(fit_preval)',
+                              paste0('scale(',num,')', collapse = ' + '), 
+                              paste0(setdiff(fac, 'MEN'), collapse = ' + '),
+                              strat_sex), collapse = "+")  ))
+)
+names(fml.integrative) <- c('age_stratSex', 'prs_stratSex', 'GMscore_stratSex', 
+                            'age_stratSex_prs','age_stratSex_GMscore', 'age_stratSex_prs_GMscore',
+                            'crf_stratSex','crf_stratSex_prs_GMscore')
+
+
+md.integrative <- lapply(fml.integrative, function(this.fml){
+  output.fit <- coxph(this.fml, data = dt)
+  output.fit$call$formula <- this.fml
+  return(output.fit)
+})
+
+res.integrative <- lapply(md.integrative, get_multivar_cox_stats)
+res2excel <- rbindlist(res.integrative, idcol = "model")
+res2excel[, Disease:=ds]
+res2excel
+
+dt.newmodelnm <- data.table(model=c('age_stratSex','prs_stratSex','GMscore_stratSex',
+                                    'age_stratSex_prs','age_stratSex_GMscore','age_stratSex_prs_GMscore',
+                                    'crf_stratSex','crf_stratSex_prs_GMscore'),
+                            modelname=c('Age','PRS','Gut microbiome score',
+                                        'Age+PRS','Age+Gut microbiome score','Age+PRS+Gut microbiome score',
+                                        'Conventional risk factors','Conventional risk factors+PRS+Gut microbiome score'))
+
+
+
+best.rocs <- 
+  lapply(ridge_cvmod, function(cvmd){
+    rocs <- roc.glmnet(cvmd$fit.preval, newy = y)
+    best <- which.max(cvmd$cvm)
+    return(rocs[[best]])
+  })
+plot(best.rocs[[1]], type = "l", main='', lwd = 1, col="grey")
+for (i in 2:10){
+  lines(best.rocs[[i]], lwd = 1,col = "grey")
+}
+lines(x = c(0,1), y = c(0,1), col='black', lty='dashed', lwd=2)
+lines(best.rocs[[optimal_run]], lwd = 2,col = "red")
+
+
+
+
+
+
+
+
+
+
 
